@@ -11,7 +11,7 @@ from pathlib import Path
 from tqdm import tqdm
 from random import shuffle
 
-"""# Download Data"""
+"""## Download dos dados"""
 
 !pip install kaggle
 
@@ -19,7 +19,7 @@ from random import shuffle
 !unzip -q data.zip -d data/
 !rm -rf data.zip data/README.md
 
-"""# Prepare Data"""
+"""## Preparo dos Dados"""
 
 data_dir = Path("/content/data/Animals")
 
@@ -96,7 +96,7 @@ test_generator = test_datagen.flow_from_directory(
 
 train_generator.class_indices
 
-"""# Build Model Archtecture"""
+"""## Construção e Treinamento do Modelo"""
 
 import tensorflow as tf
 from tensorflow.keras.models import Sequential
@@ -138,6 +138,8 @@ history = model.fit(train_generator, validation_data=test_generator, epochs=10)
 
 model.evaluate(test_generator)
 
+"""## Conversão para Tflite FP32"""
+
 import tensorflow as tf
 
 # Convert the Keras model to a TFLite model
@@ -153,6 +155,11 @@ with open('model.tflite', 'wb') as f:
     f.write(tflite_model)
 
 print("Model converted to TFLite and saved as 'model.tflite'")
+
+"""## Conversão para Tflite INT8
+
+![Alt text for the image](https://imgs.search.brave.com/XkKXFzF4CLjl8yU7wNX_MlyLP2lCyTNaWSehdq25v00/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9zdWJz/dGFja2Nkbi5jb20v/aW1hZ2UvZmV0Y2gv/JHNfIVIxbzAhLHdf/MTQ1NixjX2xpbWl0/LGZfYXV0byxxX2F1/dG86Z29vZCxmbF9w/cm9ncmVzc2l2ZTpz/dGVlcC9odHRwczov/L3N1YnN0YWNrLXBv/c3QtbWVkaWEuczMu/YW1hem9uYXdzLmNv/bS9wdWJsaWMvaW1h/Z2VzLzczMGJiYjhh/LTNhNDQtNDdmNi1h/ZWZlLWY2NTJiMTE3/YWUyMl8xMTI0eDYw/MC5wbmc)
+"""
 
 import tensorflow as tf
 import numpy as np
@@ -209,6 +216,8 @@ tflite_int8_decrease_percent = ((keras_model_size_bytes - tflite_model_int8_size
 print(f"Original Keras model size: {keras_model_size_mb:.2f} MB")
 print(f"TFLite model size: {tflite_model_size_mb:.2f} MB ({tflite_decrease_percent:.2f}% decrease)")
 print(f"TFLite int8 model size: {tflite_model_int8_size_mb:.2f} MB ({tflite_int8_decrease_percent:.2f}% decrease)")
+
+"""## Comparação Entre Keras vs FP32 vs INT8"""
 
 import matplotlib.pyplot as plt
 import numpy as np
