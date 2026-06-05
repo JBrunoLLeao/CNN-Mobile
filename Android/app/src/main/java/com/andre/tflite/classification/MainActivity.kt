@@ -13,10 +13,30 @@ class MainActivity : ComponentActivity() {
 
     private lateinit var binding: ActivityMainBinding
 
+    private fun maskToBitmap(mask: Array<IntArray>): Bitmap {
+
+        val bmp = Bitmap.createBitmap(128, 128, Bitmap.Config.ARGB_8888)
+
+        for (y in 0 until 128) {
+            for (x in 0 until 128) {
+
+                val color = when (mask[y][x]) {
+                    0 -> android.graphics.Color.argb(120, 0, 255, 0)   // pet (verde transparente)
+                    1 -> android.graphics.Color.argb(120, 0, 0, 0)     // fundo
+                    else -> android.graphics.Color.argb(120, 255, 0, 0) // borda
+                }
+
+                bmp.setPixel(x, y, color)
+            }
+        }
+
+        return bmp
+    }
+
     private var selectedBitmap: Bitmap? = null
     private var selectedModel: String = "fp32"
     private var classifier: Classifier? = null
-    private val classes = arrayOf("cat", "dog", "snake")
+    private val classes = arrayOf("pet", "background", "border")
 
     private val pickImageLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
         if (uri != null) {
@@ -73,7 +93,6 @@ class MainActivity : ComponentActivity() {
         }
 
         binding.btnPredict.setOnClickListener {
-            binding.txtResult.text = "Selected model: $selectedModel"
             runPrediction()
         }
     }
@@ -83,17 +102,14 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun runPrediction() {
-        val bitmap = selectedBitmap ?: run {
-            binding.txtResult.text = "Please select an image first"
-            return
-        }
-        val prediction = classifier?.classify(bitmap)?.mapIndexed { index, prob ->
-            "${classes.getOrNull(index)}: ${"%.2f".format(java.util.Locale.US, prob * 100)}%"
-        }?.sortedByDescending { line ->
-            line.substringAfter(": ").substringBefore("%").toDouble()
-        }?.joinToString("\n") ?: "Classification failed"
 
-        binding.txtResult.text = "Predicted classes:\n$prediction"
+        val bitmap = selectedBitmap ?: return
+
+        val mask = classifier?.classify(bitmap) ?: return
+
+        val maskBitmap = maskToBitmap(mask)
+
+        binding.imageMask.setImageBitmap(maskBitmap)
 
     }
 

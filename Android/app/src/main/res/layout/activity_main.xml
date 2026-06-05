@@ -34,6 +34,8 @@
             android:text="INT8" />
     </RadioGroup>
 
+
+
     <ImageView
         android:id="@+id/imageView"
         android:layout_width="256dp"
@@ -46,6 +48,17 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/modelSelector" />
+
+    <ImageView
+        android:id="@+id/imageMask"
+        android:layout_width="256dp"
+        android:layout_height="256dp"
+        android:layout_marginTop="90dp"
+        android:background="#000000"
+        android:scaleType="fitCenter"
+        app:layout_constraintTop_toBottomOf="@+id/imageView"
+        app:layout_constraintStart_toStartOf="@+id/imageView"
+        app:layout_constraintEnd_toEndOf="@+id/imageView" />
 
     <!--    <LinearLayout-->
     <!--        android:id="@+id/linearLayout"-->
@@ -101,7 +114,6 @@
         android:id="@+id/txtResult"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Take/Load an image!"
         android:textSize="18sp"
         android:padding="5dp"
         app:layout_constraintBottom_toTopOf="@+id/btnPredict"
@@ -109,4 +121,6 @@
         app:layout_constraintHorizontal_bias="0.496"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/linearLayout2" />
+
+
 </androidx.constraintlayout.widget.ConstraintLayout>

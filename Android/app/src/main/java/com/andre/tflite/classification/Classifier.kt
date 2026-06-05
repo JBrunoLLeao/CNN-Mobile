@@ -95,32 +95,43 @@ class Classifier(
         }
     }
 
-    fun classify(bitmap: Bitmap): FloatArray {
+    fun classify(bitmap: Bitmap): Array<IntArray> {
+
         val scaled = bitmap.scale(imageSize, imageSize, filter = true)
         val input = makeInputBuffer(scaled)
 
-        val classProbs: FloatArray = when (outType) {
-            DataType.FLOAT32 -> {
-                val out = Array(1) { FloatArray(numClasses) }
-                interpreter.run(input, out)
-                out[0]
-            }
+        val output = Array(1) { Array(numClasses) { Array(imageSize) { FloatArray(imageSize) } } }
 
-            DataType.UINT8 -> {
-                val out = Array(1) { ByteArray(numClasses) }
-                interpreter.run(input, out)
-                // (Optional) dequantize if you need probabilities: (q - zero) * scale
-                (out[0].map { ((it.toInt() and 0xFF) - outZero) * outScale }.toFloatArray())
-            }
+        val inputDetails = interpreter.getInputTensor(0).shape()
+        val outputDetails = interpreter.getOutputTensor(0).shape()
 
-            DataType.INT8 -> {
-                val out = Array(1) { ByteArray(numClasses) }
-                interpreter.run(input, out)
-                (out[0].map { (it.toInt() - outZero) * outScale }.toFloatArray())
+        println("INPUT SHAPE: ${inputDetails.contentToString()}")
+        println("OUTPUT SHAPE: ${outputDetails.contentToString()}")
+
+        val outBuffer = Array(1) { Array(imageSize) { Array(imageSize) { FloatArray(numClasses) } } }
+        interpreter.run(input, outBuffer)
+
+        val mask = Array(imageSize) { IntArray(imageSize) }
+
+        for (y in 0 until imageSize) {
+            for (x in 0 until imageSize) {
+
+                var maxIdx = 0
+                var maxVal = outBuffer[0][y][x][0]
+
+                for (c in 1 until numClasses) {
+                    val v = outBuffer[0][y][x][c]
+                    if (v > maxVal) {
+                        maxVal = v
+                        maxIdx = c
+                    }
+                }
+
+                mask[y][x] = maxIdx
             }
-            else -> throw IllegalArgumentException("Unsupported output type: $outType")
         }
-        return classProbs
+
+        return mask
     }
 
     private fun makeInputBuffer(bitmap: Bitmap): ByteBuffer {
@@ -139,9 +150,13 @@ class Classifier(
         var i = 0
         repeat(imageSize * imageSize) {
             val p = pixels[i++]
-            buf.putFloat(((p shr 16) and 0xFF) / 255f)
-            buf.putFloat(((p shr 8) and 0xFF) / 255f)
-            buf.putFloat((p and 0xFF) / 255f)
+            val r = ((p shr 16) and 0xFF) / 255f
+            val g = ((p shr 8) and 0xFF) / 255f
+            val b = (p and 0xFF) / 255f
+
+            buf.putFloat((r - 0.485f) / 0.229f)
+            buf.putFloat((g - 0.456f) / 0.224f)
+            buf.putFloat((b - 0.406f) / 0.225f)
         }
         return buf
     }
