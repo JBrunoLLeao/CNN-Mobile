@@ -8,11 +8,6 @@ Este projeto implementa um sistema completo de **segmentação semântica de ima
 Treinar modelos de segmentação semântica (U-Net / FCN) e implantá-los em um smartphone Android, permitindo inferência em tempo real sobre imagens capturadas ou carregadas pelo usuário.
 
 
-
-# Pipeline do Projeto
-
-O fluxo completo do projeto é:
-
 ---
 
 # Dataset
